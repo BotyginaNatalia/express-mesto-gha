@@ -11,7 +11,7 @@ module.exports.createNewUser = async (req, res) => {
     avatar: req.body.avatar,
   });
   await user.save();
-  if (!user) return res.status(BAD_REQUEST).send('Введенны некорректные данные');
+  if (!user) return res.status(BAD_REQUEST).send('Введены некорректные данные');
   return res.send(user);
 };
 
@@ -32,12 +32,12 @@ module.exports.updateUserInfo = async (req, res) => {
   const userInfo = req.params.id;
   User.findByIdAndUpdate(userInfo, req.body, { new: true })
     .then((user) => res.send(user))
-    .catch(() => res.status(BAD_REQUEST).send('Введенны некорректные данные'));
+    .catch(() => res.status(BAD_REQUEST).send('Введены некорректные данные'));
 };
 
 module.exports.updateUserAvatar = (req, res) => {
   const newUserAvatar = req.body.avatar;
   User.findByIdAndUpdate(req.user_id, { newUserAvatar }, { new: true })
     .then((user) => res.send(user))
-    .catch(() => res.status(BAD_REQUEST).send('Введенны некорректные данные'));
+    .catch(() => res.status(BAD_REQUEST).send('Введены некорректные данные'));
 };

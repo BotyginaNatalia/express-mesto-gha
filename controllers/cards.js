@@ -18,7 +18,7 @@ module.exports.createNewCard = async (req, res) => {
     createdAt: req.body.createdAt,
   });
   await card.save();
-  if (!card) return res.status(BAD_REQUEST).send('Введенны некорректные данные');
+  if (!card) return res.status(BAD_REQUEST).send('Введены некорректные данные');
   return res.send(card);
 };
 
