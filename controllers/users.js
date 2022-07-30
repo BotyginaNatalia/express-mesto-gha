@@ -37,7 +37,7 @@ module.exports.updateUserInfo = async (req, res) => {
     .catch(() => res.status(BAD_REQUEST).send('Введены некорректные данные'));
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = async (req, res) => {
   const newUserAvatar = req.body.avatar;
   User.findByIdAndUpdate(req.user_id, { newUserAvatar }, { new: true })
     .then((user) => res.send(user))
