@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign, no-underscore-dangle */
+
 const User = require('../models/user');
 
 const BAD_REQUEST = 400;

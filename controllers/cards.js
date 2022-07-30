@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign, no-underscore-dangle */
+
 const Card = require('../models/card');
 
 const BAD_REQUEST = 400;
