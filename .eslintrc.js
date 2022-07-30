@@ -14,7 +14,5 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
-    no-underscore-dangle: off,
-    no-param-reassign: off
   },
 };
