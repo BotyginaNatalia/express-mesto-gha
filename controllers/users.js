@@ -1,5 +1,7 @@
 const User = require('../models/user');
-const { BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED } = require('../errors');
+const {
+  BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED,
+} = require('../errors');
 
 module.exports.createNewUser = async (req, res) => {
   try {
