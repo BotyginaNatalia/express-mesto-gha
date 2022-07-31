@@ -10,7 +10,7 @@ module.exports.createNewUser = async (req, res) => {
     });
     await user.save();
     res.status(CREATED).send('Пользователь создан');
-  } catch {
+  } catch (error) {
     res.status(BAD_REQUEST).send('Введены некорректные данные');
   }
 };
@@ -19,7 +19,7 @@ module.exports.getUsers = async (req, res) => {
   try {
     const user = await User.find(req.params._id);
     res.send(user);
-  } catch {
+  } catch (error) {
     res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
   }
 };

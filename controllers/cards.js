@@ -1,11 +1,13 @@
 const Card = require('../models/card');
-const { BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED } = require('../errors');
+const {
+  BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED,
+} = require('../errors');
 
 module.exports.getCards = async (req, res) => {
   try {
     const card = await Card.find(req.params._id);
     res.send(card);
-  } catch {
+  } catch (error) {
     res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
   }
 };
@@ -19,7 +21,7 @@ module.exports.createNewCard = async (req, res) => {
     });
     await card.save();
     res.status(CREATED).send('Карточка создана');
-  } catch {
+  } catch (error) {
     res.status(BAD_REQUEST).send('Введены некорректные данные');
   }
 };
@@ -41,7 +43,7 @@ module.exports.setLikeToCard = (req, res) => {
       if (!card) return res.status(NOT_FOUND).send('Карточка с данным id не найдена');
       return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
     });
-}
+};
 
 module.exports.removeLikeFromCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
@@ -49,4 +51,4 @@ module.exports.removeLikeFromCard = (req, res) => {
       if (!card) return res.status(NOT_FOUND).send('Карточка с данным id не найдена');
       return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
     });
-}
+};
