@@ -10,10 +10,27 @@ module.exports.createNewUser = async (req, res) => {
       about: req.body.about,
       avatar: req.body.avatar,
     });
-    await user.create();
+    await user.save();
     res.status(CREATED).send('Пользователь создан');
   } catch (error) {
     res.status(BAD_REQUEST).send('Введены некорректные данные');
+  }
+};
+
+module.exports.createUser = async (req, res) => {
+  try {
+    const { name, about, avatar } = req.body;
+    const user = await User.create({ name, about, avatar });
+    return res.send(user);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(statusCodes.BAD_REQUEST).send({
+        message: 'Переданы некорректные данные при создании пользователя',
+      });
+    }
+    return res
+      .status(statusCodes.DEFAULT)
+      .send({ message: 'На сервере произошла ошибка' });
   }
 };
 
