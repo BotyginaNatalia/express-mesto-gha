@@ -1,45 +1,73 @@
-/* eslint-disable no-param-reassign, no-underscore-dangle */
-
 const User = require('../models/user');
-
-const BAD_REQUEST = 400;
-const NOT_FOUND = 404;
-const INTERNAL_ERROR = 500;
+const { BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED } = require('../errors');
 
 module.exports.createNewUser = async (req, res) => {
-  const user = new User({
-    name: req.body.name,
-    about: req.body.about,
-    avatar: req.body.avatar,
-  });
-  await user.save();
-  if (!user) return res.status(BAD_REQUEST).send('Введены некорректные данные');
-  return res.send(user);
+  try {
+    const user = new User({
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+    });
+    await user.save();
+    res.status(CREATED).send('Пользователь создан');
+  } catch {
+    res.status(BAD_REQUEST).send('Введены некорректные данные');
+  }
 };
 
 module.exports.getUsers = async (req, res) => {
-  const user = await User.find(req.params.id);
-  if (!user) return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
-  return res.send(user);
+  try {
+    const user = await User.find(req.params._id);
+    res.send(user);
+  } catch {
+    res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+  }
 };
 
-module.exports.getUserById = async (req, res) => {
-  const userId = req.params.id;
-  User.findById(userId, req.body, { new: true })
-    .then((user) => res.send(user))
-    .catch(() => res.status(NOT_FOUND).send('Пользователь с указанным id не найден'));
+module.exports.getUserById = (req, res) => {
+  const userId = req.params._id;
+  User.findById(userId)
+    .then((user) => {
+      if (!user) { throw res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
+      res.send(user);
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        res.status(BAD_REQUEST).send('Введены некорректные данные');
+      } else {
+        res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      }
+    });
 };
 
-module.exports.updateUserInfo = async (req, res) => {
-  const userInfo = req.params.id;
-  User.findByIdAndUpdate(userInfo, req.body, { new: true })
-    .then((user) => res.send(user))
-    .catch(() => res.status(BAD_REQUEST).send('Введены некорректные данные'));
+module.exports.updateUserInfo = (req, res) => {
+  const userInfo = req.params._id;
+  User.findByIdAndUpdate(userInfo, req.body, { new: true, runValidators: true })
+    .then((user) => {
+      if (!user) { throw res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
+      res.send(user);
+    })
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send('Введены некорректные данные');
+      } else {
+        res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      }
+    });
 };
 
-module.exports.updateUserAvatar = async (req, res) => {
+module.exports.updateUserAvatar = (req, res) => {
   const newUserAvatar = req.body.avatar;
-  User.findByIdAndUpdate(req.user_id, { newUserAvatar }, { new: true })
-    .then((user) => res.send(user))
-    .catch(() => res.status(BAD_REQUEST).send('Введены некорректные данные'));
+  User.findByIdAndUpdate(req.user_id, { newUserAvatar }, { new: true, runValidators: true })
+    .then((user) => {
+      if (!user) { throw res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
+      res.send(user);
+    })
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        res.status(BAD_REQUEST).send('Введены некорректные данные');
+      } else {
+        res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      }
+    });
 };

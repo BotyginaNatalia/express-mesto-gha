@@ -1,43 +1,52 @@
-/* eslint-disable no-param-reassign, no-underscore-dangle */
-
 const Card = require('../models/card');
-
-const BAD_REQUEST = 400;
-const INTERNAL_ERROR = 500;
+const { BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED } = require('../errors');
 
 module.exports.getCards = async (req, res) => {
-  const card = await Card.find(req.params.id);
-  if (!card) return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
-  return res.send(card);
+  try {
+    const card = await Card.find(req.params._id);
+    res.send(card);
+  } catch {
+    res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+  }
 };
 
 module.exports.createNewCard = async (req, res) => {
-  const card = new Card({
-    name: req.body.name,
-    link: req.body.link,
-    owner: req.body.owner,
-    likes: req.body.likes,
-    createdAt: req.body.createdAt,
-  });
-  await card.save();
-  if (!card) return res.status(BAD_REQUEST).send('Введены некорректные данные');
-  return res.send(card);
+  try {
+    const card = new Card({
+      name: req.body.name,
+      link: req.body.link,
+      owner: req.user._id,
+    });
+    await card.save();
+    res.status(CREATED).send('Карточка создана');
+  } catch {
+    res.status(BAD_REQUEST).send('Введены некорректные данные');
+  }
 };
 
-module.exports.deleteCard = async (req, res) => {
-  const cardId = req.params.id;
-  await Card.findByIdAndDelete(cardId);
-  return res.send('Карточка удалена');
+module.exports.deleteCard = (req, res) => {
+  Card.findByIdAndDelete(req.params._id)
+    .then((card) => {
+      if (!card) { throw res.status(NOT_FOUND).send('Карточка с данным id не найдена'); }
+      res.send(card);
+    })
+    .catch(() => {
+      res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+    });
 };
 
-module.exports.setLikeToCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.cardId,
-  { $addToSet: { likes: req.user.id } },
-  { new: true },
-);
+module.exports.setLikeToCard = (req, res) => {
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .then((card) => {
+      if (!card) return res.status(NOT_FOUND).send('Карточка с данным id не найдена');
+      return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+    });
+}
 
-module.exports.removeLikeFromCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.cardId,
-  { $pull: { likes: req.user.id } },
-  { new: true },
-);
+module.exports.removeLikeFromCard = (req, res) => {
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .then((card) => {
+      if (!card) return res.status(NOT_FOUND).send('Карточка с данным id не найдена');
+      return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+    });
+}
