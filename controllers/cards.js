@@ -1,7 +1,7 @@
 const Card = require('../models/card');
 const {
   BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED,
-} = require('../errors');
+} = require('../errors/errors');
 
 module.exports.getCards = async (req, res) => {
   try {
@@ -22,7 +22,11 @@ module.exports.createNewCard = async (req, res) => {
     await card.save();
     res.status(CREATED).send('Карточка создана');
   } catch (error) {
-    res.status(BAD_REQUEST).send('Введены некорректные данные');
+    if (error.name === 'ValidationError') {
+      res.status(BAD_REQUEST).send('Введены некорректные данные');
+    } else {
+      res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+    }
   }
 };
 
@@ -30,10 +34,14 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params._id)
     .then((card) => {
       if (!card) { throw res.status(NOT_FOUND).send('Карточка с данным id не найдена'); }
-      res.send(card);
+      res.status(CREATED).send('Карточка успешно удалена');
     })
-    .catch(() => {
-      res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        res.status(BAD_REQUEST).send('Введены некорректные данные');
+      } else {
+        res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      }
     });
 };
 
@@ -41,7 +49,14 @@ module.exports.setLikeToCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) return res.status(NOT_FOUND).send('Карточка с данным id не найдена');
-      return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      return res.status(CREATED).send('Лайк успешно поставлен');
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        res.status(BAD_REQUEST).send('Введены некорректные данные');
+      } else {
+        res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      }
     });
 };
 
@@ -49,6 +64,13 @@ module.exports.removeLikeFromCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) return res.status(NOT_FOUND).send('Карточка с данным id не найдена');
-      return res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      return res.status(CREATED).send('Лайк успешно удален');
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        res.status(BAD_REQUEST).send('Введены некорректные данные');
+      } else {
+        res.status(INTERNAL_ERROR).send('Произошла ошибка на сервере');
+      }
     });
 };
