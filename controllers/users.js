@@ -10,7 +10,7 @@ module.exports.createNewUser = async (req, res) => {
       about: req.body.about,
       avatar: req.body.avatar,
     });
-    await user.save();
+    await user.create();
     res.status(CREATED).send('Пользователь создан');
   } catch (error) {
     res.status(BAD_REQUEST).send('Введены некорректные данные');

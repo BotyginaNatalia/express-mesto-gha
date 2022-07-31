@@ -19,7 +19,7 @@ module.exports.createNewCard = async (req, res) => {
       link: req.body.link,
       owner: req.user._id,
     });
-    await card.save();
+    await card.create();
     res.status(CREATED).send('Карточка создана');
   } catch (error) {
     res.status(BAD_REQUEST).send('Введены некорректные данные');
