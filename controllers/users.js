@@ -34,8 +34,8 @@ module.exports.getUserById = (req, res) => {
   const userId = req.params._id;
   User.findById(userId)
     .then((user) => {
-      if (!user) { res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
-      res.send(user);
+      if (!user) { return res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
+      return res.send(user);
     })
     .catch((error) => {
       if (error.name === 'CastError') {
@@ -50,8 +50,8 @@ module.exports.updateUserInfo = (req, res) => {
   const userInfo = req.params._id;
   User.findByIdAndUpdate(userInfo, req.body, { new: true, runValidators: true })
     .then((user) => {
-      if (!user) { res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
-      res.send(user);
+      if (!user) { return res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
+      return res.send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
@@ -66,8 +66,8 @@ module.exports.updateUserAvatar = (req, res) => {
   const newUserAvatar = req.body.avatar;
   User.findByIdAndUpdate(req.user_id, { newUserAvatar }, { new: true, runValidators: true })
     .then((user) => {
-      if (!user) { res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
-      res.send(user);
+      if (!user) { return res.status(NOT_FOUND).send('Пользователь с указанным id не найден'); }
+      return res.send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
