@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 const {
-  BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED, SUCCESS
+  BAD_REQUEST, NOT_FOUND, INTERNAL_ERROR, CREATED, SUCCESS,
 } = require('../errors/errors');
 
 module.exports.getCards = async (req, res) => {
