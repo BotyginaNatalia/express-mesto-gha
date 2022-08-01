@@ -33,7 +33,7 @@ module.exports.createNewCard = async (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params._id)
     .then((card) => {
-      if (!card) { throw res.status(NOT_FOUND).send('Карточка с данным id не найдена'); }
+      if (!card) { res.status(NOT_FOUND).send('Карточка с данным id не найдена'); }
       res.status(CREATED).send('Карточка успешно удалена');
     })
     .catch((error) => {
