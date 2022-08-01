@@ -64,7 +64,7 @@ module.exports.removeLikeFromCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) return res.status(NOT_FOUND).send('Карточка с данным id не найдена');
-      return res.status(CREATED).send('Лайк успешно удален');
+      return res.status(SUCCESS).send('Лайк успешно удален');
     })
     .catch((error) => {
       if (error.name === 'CastError') {
