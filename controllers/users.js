@@ -95,3 +95,12 @@ module.exports.login = (req, res) => {
       res.status(NotFoundErr).send('Введены неправильные почта или пароль');
     });
 };
+
+module.exports.getUser = async (req, res, next) => {
+  try {
+    const user = await User.find(req.params._id);
+    res.send(user);
+  } catch (error) {
+    next(new InternalErr('Произошла ошибка на сервере'));
+  }
+};
