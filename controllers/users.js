@@ -3,6 +3,7 @@ const User = require('../models/user');
 const { BadRequestErr } = require('../errors/BadRequestErr');
 const { InternalErr } = require('../errors/InternalErr');
 const { NotFoundErr } = require('../errors/NotFoundErr');
+const { ConflictErr } = require('../errors/ConflictErr');
 const { Created } = require('../errors/Created');
 
 module.exports.createNewUser = async (req, res, next) => {
@@ -15,13 +16,17 @@ module.exports.createNewUser = async (req, res, next) => {
     });
     user.password = await user.hashPass(req.body.password);
     await user.save();
-    res.status(Created).send('Пользователь создан');
+    res.status(Created).send({
+      data: {
+        name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      },
+    });
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new BadRequestErr('Введены некорректные данные'));
     }
     if (error.name === 'MongoError' && error.code === 11000) {
-      next(new Error('Пользователь с данным email уже существует'));
+      next(new ConflictErr('Пользователь с данным email уже существует'));
     }
     next(new InternalErr('Произошла ошибка на сервере'));
   }
@@ -29,7 +34,7 @@ module.exports.createNewUser = async (req, res, next) => {
 
 module.exports.getUsers = async (req, res, next) => {
   try {
-    const user = await User.find(req.params._id);
+    const user = await User.find({});
     res.send(user);
   } catch (error) {
     next(new InternalErr('Произошла ошибка на сервере'));
@@ -37,33 +42,32 @@ module.exports.getUsers = async (req, res, next) => {
 };
 
 module.exports.getUserById = (req, res, next) => {
-  const userId = req.params._id;
-  User.findById(userId)
+  User.findById(req.params.userId)
     .then((user) => {
-      if (!user) { return res.status(NotFoundErr).send('Пользователь с указанным id не найден'); }
+      if (!user) next(new NotFoundErr('Пользователь с указанным id не найден'));
       return res.send(user);
     })
     .catch((error) => {
       if (error.name === 'CastError') {
         next(BadRequestErr('Введены некорректные данные'));
       } else {
-        next(new InternalErr('Произошла ошибка на сервере'));
+        next(error);
       }
     });
 };
 
 module.exports.updateUserInfo = (req, res, next) => {
-  const userInfo = req.params._id;
+  const userInfo = req.user._id;
   User.findByIdAndUpdate(userInfo, req.body, { new: true, runValidators: true })
     .then((user) => {
-      if (!user) { return res.status(NotFoundErr).send('Пользователь с указанным id не найден'); }
+      if (!user) next(new NotFoundErr('Пользователь с указанным id не найден'));
       return res.send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(BadRequestErr('Введены некорректные данные'));
       } else {
-        next(new InternalErr('Произошла ошибка на сервере'));
+        next(error);
       }
     });
 };
@@ -72,14 +76,14 @@ module.exports.updateUserAvatar = (req, res, next) => {
   const newUserAvatar = req.body.avatar;
   User.findByIdAndUpdate(req.user_id, { newUserAvatar }, { new: true, runValidators: true })
     .then((user) => {
-      if (!user) { return res.status(NotFoundErr).send('Пользователь с указанным id не найден'); }
+      if (!user) next(new NotFoundErr('Пользователь с указанным id не найден'));
       return res.send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(BadRequestErr('Введены некорректные данные'));
       } else {
-        next(new InternalErr('Произошла ошибка на сервере'));
+        next(error);
       }
     });
 };
@@ -98,7 +102,7 @@ module.exports.login = (req, res) => {
 
 module.exports.getUser = async (req, res, next) => {
   try {
-    const user = await User.find(req.params._id);
+    const user = await User.find(req.user._id);
     res.send(user);
   } catch (error) {
     next(new InternalErr('Произошла ошибка на сервере'));

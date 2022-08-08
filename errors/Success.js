@@ -1,8 +1,3 @@
-class Success extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = 200;
-  }
-}
+const Success = 200;
 
 module.exports = { Success };
