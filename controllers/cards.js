@@ -23,11 +23,7 @@ module.exports.createNewCard = async (req, res, next) => {
       owner: req.user._id,
     });
     await card.save();
-    res.status(Created).send({
-      data: {
-        name: card.name, link: card.link, owner: card.owner,
-      },
-    });
+    res.status(Created).send(card);
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new BadRequestErr('Введены некорректные данные'));
@@ -66,7 +62,7 @@ module.exports.setLikeToCard = (req, res, next) => {
 };
 
 module.exports.removeLikeFromCard = (req, res, next) => {
-  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) return next(new NotFoundErr('Карточка с данным id не найдена'));
       return res.status(Success).send({ message: 'Лайк успешно удален' });

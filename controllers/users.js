@@ -74,7 +74,7 @@ module.exports.updateUserInfo = (req, res, next) => {
 
 module.exports.updateUserAvatar = (req, res, next) => {
   const newUserAvatar = req.body.avatar;
-  User.findByIdAndUpdate(req.user_id, { newUserAvatar }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(req.user._id, { newUserAvatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) next(new NotFoundErr('Пользователь с указанным id не найден'));
       return res.send(user);
@@ -102,7 +102,7 @@ module.exports.login = (req, res, next) => {
 
 module.exports.getUser = async (req, res, next) => {
   try {
-    const user = await User.find(req.user._id);
+    const user = await User.findById(req.user._id);
     res.send(user);
   } catch (error) {
     next(new InternalErr('Произошла ошибка на сервере'));
