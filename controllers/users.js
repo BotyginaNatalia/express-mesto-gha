@@ -24,12 +24,11 @@ module.exports.createNewUser = async (req, res, next) => {
     });
   } catch (error) {
     if (error.name === 'ValidationError') {
-      return next(new BadRequestErr('Введены некорректные данные'));
-    }
-    if (error.code === 11000) {
+      next(new BadRequestErr('Введены некорректные данные'));
+    } else if (error.code === 11000) {
       next(new ConflictErr('Пользователь с данным email уже существует'));
     }
-    next(new InternalErr('Произошла ошибка на сервере'));
+    next(error);
   }
 };
 
