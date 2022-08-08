@@ -7,6 +7,8 @@ const {
 
 router.get('/', getUsers);
 
+router.get('/me', getUser);
+
 router.get(
   '/:userId',
   celebrate({
@@ -26,10 +28,8 @@ router.patch('/me', celebrate({
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().regex(/^(https?:\/\/)?[a-z0-9~_-]+\.[a-z]{2,9}(\/|:|\?[!-~]*)?$/),
+    avatar: Joi.string().required().regex(/^(https?:\/\/)?[a-z0-9~_-]+\.[a-z]{2,9}(\/|:|\?[!-~]*)?$/),
   }),
 }), updateUserAvatar);
-
-router.get('/me', getUser);
 
 module.exports = router;

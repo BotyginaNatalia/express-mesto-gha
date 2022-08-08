@@ -23,7 +23,11 @@ module.exports.createNewCard = async (req, res, next) => {
       owner: req.user._id,
     });
     await card.save();
-    res.status(Created).send('Карточка создана');
+    res.status(Created).send({
+      data: {
+        name: card.name, link: card.link, owner: card.owner,
+      },
+    });
   } catch (error) {
     if (error.name === 'ValidationError') {
       next(new BadRequestErr('Введены некорректные данные'));
@@ -37,11 +41,11 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .orFail(new NotFoundErr('Карточка с данным id не найдена'))
     .then((card) => {
-      if (!card.owner.equals(req.user_id)) {
+      if (!card.owner.equals(req.user._id)) {
         return next(new ForbiddenErr('Нельзя удалить чужую карточку'));
       }
       return card.remove()
-        .then(() => res.send('Карточка успешно удалена'));
+        .then(() => res.send({ message: 'Карточка успешно удалена' }));
     })
     .catch(next);
 };
@@ -50,7 +54,7 @@ module.exports.setLikeToCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) next(new NotFoundErr('Карточка с данным id не найдена'));
-      return res.status(Created).send('Лайк успешно поставлен');
+      return res.status(Created).send({ message: 'Лайк успешно поставлен' });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
@@ -65,7 +69,7 @@ module.exports.removeLikeFromCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) return next(new NotFoundErr('Карточка с данным id не найдена'));
-      return res.status(Success).send('Лайк успешно удален');
+      return res.status(Success).send({ message: 'Лайк успешно удален' });
     })
     .catch((error) => {
       if (error.name === 'CastError') {

@@ -5,6 +5,7 @@ const { InternalErr } = require('../errors/InternalErr');
 const { NotFoundErr } = require('../errors/NotFoundErr');
 const { ConflictErr } = require('../errors/ConflictErr');
 const { Created } = require('../errors/Created');
+const { AuthErr } = require('../errors/AuthErr');
 
 module.exports.createNewUser = async (req, res, next) => {
   try {
@@ -23,9 +24,9 @@ module.exports.createNewUser = async (req, res, next) => {
     });
   } catch (error) {
     if (error.name === 'ValidationError') {
-      next(new BadRequestErr('Введены некорректные данные'));
+      return next(new BadRequestErr('Введены некорректные данные'));
     }
-    if (error.name === 'MongoError' && error.code === 11000) {
+    if (error.code === 11000) {
       next(new ConflictErr('Пользователь с данным email уже существует'));
     }
     next(new InternalErr('Произошла ошибка на сервере'));
@@ -96,7 +97,7 @@ module.exports.login = (req, res, next) => {
       return res.send({ token });
     })
     .catch(() => {
-      next(new NotFoundErr('Введены неправильные почта или пароль'));
+      next(new AuthErr('Введены неправильные почта или пароль'));
     });
 };
 
