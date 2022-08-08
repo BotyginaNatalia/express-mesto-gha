@@ -88,7 +88,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -96,7 +96,7 @@ module.exports.login = (req, res) => {
       return res.send({ token });
     })
     .catch(() => {
-      res.status(NotFoundErr).send('Введены неправильные почта или пароль');
+      next(new NotFoundErr('Введены неправильные почта или пароль'));
     });
 };
 
